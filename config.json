@@ -1,0 +1,69 @@
+{
+    "engines":{
+
+        "jsdoc-toolkit":{
+            "vars":{
+                "DOCDIR": "-Djsdoc.dir=$BASEDIR",
+                "APPDIR": "$BASEDIR/app",
+                "BASEDIR": "$VENDOR/jsdoc-toolkit",
+                "TDIR": "-Djsdoc.template.dir=$BASEDIR/templates/jsdoc"
+            },
+            "cmd": {
+                "main": "java",
+                "params": [
+                    "$DOCDIR",
+                    "$TDIR",
+                    "-jar",
+                    "$BASEDIR/jsrun.jar",
+                    "$APPDIR/run.js",
+                    "-p", 
+                    "-v",
+                    "-r=10",
+                    "-e=UTF-8",
+                    "-d=$DESTINATION",
+                    "$SOURCE"
+                ]
+            }
+        },
+        
+        "phpDocumentor": {
+            "vars": {},
+            "cmd": {
+                "main": "phpdoc",
+                "params": [
+                    "-o",
+                    "HTML:Smarty:PHP",
+                    "--directory",
+                    "$SOURCE",
+                    "-t",
+                    "$DESTINATION"
+                ]
+            }
+        },
+        
+        "pdoc": {
+            "vars": {},
+            "cmd": {
+                "main": "pdoc",
+                "params": [
+                    "-o",
+                    "$DESTINATION",
+                    "-d",
+                    "$SOURCE"
+                ]
+            }
+        },
+        
+        "jsduck": {
+            "vars": {},
+            "cmd": {
+                "main": "jsduck",
+                "params": [
+                    "$SOURCE",
+                    "--output",
+                    "$DESTINATION"
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,8 @@
+check host server with address 127.0.0.1
+    start program = "/usr/local/bin/node /home/openbirdie/docs/server.js"
+        as uid openbirdie and gid openbirdie
+    stop program  = "/usr/bin/pkill -f 'node /home/openbirdie/docs/server.js'"
+        as uid root and gid root
+    if failed port 9031
+        with timeout 10 seconds
+        then restart
