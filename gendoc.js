@@ -286,7 +286,7 @@ Documentor.prototype.replaceParam = function(format, key, value){
             replace(/\%value\%/g, value).trim();
 }
 
-Documentor.prototye.spawner = function(cmd, params, callback){
+Documentor.prototype.spawner = function(cmd, params, callback){
 	var curState,
     	command = spawn(cmd, params);
 	
