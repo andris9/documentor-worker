@@ -228,13 +228,13 @@ Documentor.prototype.handleParams = function(params){
     
     Object.keys(params).forEach((function(key){
         if(engine["allowed-params"].indexOf(key)<0)return; // not allowed
-        userKeys[key] = true;
+        usedKeys[key] = true;
         this.addParamValue(defaults, engine, key, params[key]);
     }).bind(this));
     
     if(engine.cmd["default-params"]){
         Object.keys(engine.cmd["default-params"]).forEach((function(key){
-            if(!userKeys[key]){
+            if(!usedKeys[key]){
                 this.addParamValue(defaults, engine, key, engine.cmd["default-params"][key]);
             }
         }).bind(this));
