@@ -9,20 +9,48 @@
                 "TDIR": "-Djsdoc.template.dir=$BASEDIR/templates/jsdoc"
             },
             "cmd": {
+                
                 "main": "java",
+                
                 "params": [
                     "$DOCDIR",
                     "$TDIR",
                     "-jar",
                     "$BASEDIR/jsrun.jar",
                     "$APPDIR/run.js",
-                    "-p", 
                     "-v",
-                    "-r=10",
                     "-e=UTF-8",
                     "-d=$DESTINATION",
-                    "$SOURCE"
-                ]
+                    "$SOURCE",
+                    "$DEFAULTS"
+                ],
+                
+                "default-params": {
+                    "-p": true,
+                    "-r": 10
+                }
+            },
+            
+            "allowed-params":[
+                "-a", 
+                "--allfunctions", 
+                "-E", 
+                "--exclude", 
+                "-n", 
+                "--nocode", 
+                "-p", 
+                "--private", 
+                "-r", 
+                "--recurse",
+                "-u",
+                "--unique",
+                "-x",
+                "--ext"
+            ],
+            
+            "params-format":{
+                "short": ["%key%", "%value%"],
+                "full": "%key%=%value%"
             }
         },
         

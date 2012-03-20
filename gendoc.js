@@ -5,7 +5,8 @@ var EventEmitter = require('events').EventEmitter,
     pathlib = require("path"),
     enginelib = require("./engine"),
     fs = require("fs"),
-    crypto = require("crypto");
+    crypto = require("crypto"),
+    config = require("./config.json");
 
 module.exports.Documentor = Documentor;
 
@@ -193,9 +194,19 @@ Documentor.prototype.loadRepoOptions = function(callback){
                 replace(/[^a-z0-9\-\.]/i, "").trim();
         }
         
-        Object.keys(defaultOptions).forEach((function(key){
+        Object.keys(defaultOptions).forEch((function(key){
             this.options[key] = (options[key] || defaultOptions[key] || "").toString("utf-8").trim();
         }).bind(this));
+
+        options.params = {
+            "-E": "abc!",
+            "-e": "cde!",
+            "-r": "34"
+        }
+
+        if(typeof options.params == "object"){
+            this.handleParams(options.params);
+        }
         
         if(this.options.source.substr(0, this.options.checkoutDirectory.length) != this.options.checkoutDirectory){
             this.options.source = this.options.checkoutDirectory;
@@ -205,7 +216,77 @@ Documentor.prototype.loadRepoOptions = function(callback){
     }).bind(this));
 }
 
-Documentor.prototype.spawner = function(cmd, params, callback){
+Documentor.prototype.handleParams = function(params){
+    var engine = config.engines[this.options.engine],
+        curdefault,
+        defaults = [],
+        usedKeys = {};
+        
+    if(!engine || !engine["allowed-params"]){
+        return;
+    }
+    
+    Object.keys(params).forEach((function(key){
+        if(engine["allowed-params"].indexOf(key)<0)return; // not allowed
+        userKeys[key] = true;
+        this.addParamValue(defaults, engine, key, params[key]);
+    }).bind(this));
+    
+    if(engine.cmd["default-params"]){
+        Object.keys(engine.cmd["default-params"]).forEach((function(key){
+            if(!userKeys[key]){
+                this.addParamValue(defaults, engine, key, engine.cmd["default-params"][key]);
+            }
+        }).bind(this));
+    }
+    
+    console.log(defaults);
+}
+
+Documentor.prototype.addParamValue = function(defaults, engine, key, value){
+    if(engine["params-format"]){
+        if(key.match(/^\-[^\-]/)){
+            if(engine["params-format"]["short"]){
+                if((curdefault = this.replaceParam(engine["params-format"]["short"], key, value))){
+                    defaults = defaults.concat(curdefault);
+                }
+            }
+        }else if(key.match(/^\-\-/)){
+            if(engine["params-format"]["full"]){
+                if((curdefault = this.replaceParam(engine["params-format"]["full"], key, value))){
+                    defaults = defaults.concat(curdefault);
+                }
+            }
+        }
+    }
+}
+
+Documentor.prototype.replaceParam = function(format, key, value){
+    var response;
+    
+    value = (value || "").toString().trim();
+
+    if(value === true || value.charAt(0) == "-"){
+       value = "";
+    }
+    
+    if(Array.isArray(format)){
+        response = [];
+        format.forEach((function(str){
+            str = str.replace(/\%key\%/g, key).replace(/\%value\%/g, value).trim();
+            if(str){
+                response.push(str);
+            }
+        }).bind(this));
+        return response;
+    }
+    
+    return (format || "").toString().
+            replace(/\%key\%/g, key).
+            replace(/\%value\%/g, value).trim();
+}
+
+Documentor.prototye.spawner = function(cmd, params, callback){
 	var curState,
     	command = spawn(cmd, params);
 	
