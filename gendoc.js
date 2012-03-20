@@ -194,7 +194,7 @@ Documentor.prototype.loadRepoOptions = function(callback){
                 replace(/[^a-z0-9\-\.]/i, "").trim();
         }
         
-        Object.keys(defaultOptions).forEch((function(key){
+        Object.keys(defaultOptions).forEach((function(key){
             this.options[key] = (options[key] || defaultOptions[key] || "").toString("utf-8").trim();
         }).bind(this));
 
