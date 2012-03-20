@@ -41,7 +41,21 @@ function generateCmdParams(params, vars){
         curparams = [];
     
     // copy params
-    curparams = params.map(function(elm){return elm;});
+    curparams = params.map(function(elm){return (elm || "").toString().trim();});
+
+    // remove empty params
+    Object.keys(vars).forEach(function(key){
+        if(!vars[key] || (Array.isArray(vars[key]) && !vars[key].length)){
+            
+            for(var i = curparams.length-1; i>=0; i--){
+                curparams[i] = curparams[i].replace(new RegExp("\\$"+key,"g"), "").trim();
+                if(!curparams[i]){
+                    curparams.splice(i, 1);
+                }
+            }
+            
+        }
+    });
     
     // loop until all keys have been replaced or  max threshold of 10 loops is passed 
     done = false;

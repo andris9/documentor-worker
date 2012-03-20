@@ -27,7 +27,7 @@
                 
                 "default-params": {
                     "-p": true,
-                    "-r": 10
+                    "-r": "10"
                 }
             },
             
@@ -48,6 +48,16 @@
                 "--ext"
             ],
             
+            "param-alias":{
+                "--allfunctions":"-a",
+                "--exclude": "-E",
+                "--recurse": "-r",
+                "--nocode": "-n",
+                "--private": "-p",
+                "--unique": "-u",
+                "--ext": "-x"
+            },
+            
             "params-format":{
                 "short": ["%key%", "%value%"],
                 "full": "%key%=%value%"
@@ -55,22 +65,86 @@
         },
         
         "phpDocumentor": {
+            
             "vars": {},
+            
             "cmd": {
                 "main": "phpdoc",
                 "params": [
-                    "-o",
-                    "HTML:Smarty:PHP",
                     "--directory",
                     "$SOURCE",
                     "-t",
                     "$DESTINATION"
-                ]
+                ],
+                
+                "default-params": {
+                    "-o": "HTML:Smarty:PHP"
+                }
+            },
+            
+            "allowed-params": [
+                "-ed",
+                "--examplesdir",
+                "-i",
+                "--ignore",
+                "-is",
+                "--ignoresymlinks",
+                "-it",
+                "--ignore-tags",
+                "-dh",
+                "--hidden",
+                "-ue",
+                "--undocumentedelements",
+                "-ti",
+                "--title",
+                "-pp",
+                "--parseprivate",
+                "-po",
+                "--packageoutput",
+                "-dn",
+                "--defaultpackagename",
+                "-dc",
+                "--defaultcategoryname",
+                "-o",
+                "--output",
+                "-s",
+                "--sourcecode",
+                "-j",
+                "--javadocdesc",
+                "-p",
+                "--pear",
+                "-ric",
+                "--readmeinstallchangelog"
+            ],
+            
+            "param-alias": {
+                "--examplesdir": "-ed",
+                "--ignore": "-i",
+                "--ignoresymlinks": "-is",
+                "--ignore-tags": "-it",
+                "--hidden": "-dh",
+                "--undocumentedelements": "-ue",
+                "--title": "-ti",
+                "--parseprivate": "-pp",
+                "--packageoutput": "-po",
+                "--defaultpackagename": "-dn",
+                "--defaultcategoryname": "-dc",
+                "--output": "-o",
+                "--sourcecode": "-s",
+                "--javadocdesc": "-j",
+                "--pear": "-p",
+                "--readmeinstallchangelog": "-ric"
+            },
+            
+            "params-filter": {
+                "-ed": "chroot",
+                "--examplesdir": "chroot"
             }
         },
         
         "pdoc": {
             "vars": {},
+            
             "cmd": {
                 "main": "pdoc",
                 "params": [
@@ -84,13 +158,49 @@
         
         "jsduck": {
             "vars": {},
+            
             "cmd": {
                 "main": "jsduck",
                 "params": [
                     "$SOURCE",
+                    "-v",
+                    "-p 0",
                     "--output",
-                    "$DESTINATION"
+                    "$DESTINATION",
+                    "$DEFAULTS"
                 ]
+            },
+            
+            "params-format":{
+                "short": ["%key%", "%value%"],
+                "full": "%key%=%value%"
+            },
+            
+            "allowed-params": [
+                "--ignore-global",
+                "--external",
+                "--builtin-classes",
+                "--title",
+                "--footer",
+                "--head-html",
+                "--welcome",
+                "--stats",
+                "--categories",
+                "--pretty-json",
+                "--images",
+                "--link",
+                "--img",
+                "--warnings",
+                "--extjs-path",
+                "--touch-examples-ui",
+                "--ext-namespaces"
+            ],
+            
+            "params-filter": {
+                "--welcome": "chroot",
+                "--images": "chroot",
+                "--categories": "chroot",
+                "--extjs-path": "chroot"
             }
         }
     }

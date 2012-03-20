@@ -17,6 +17,7 @@ function Documentor(repo, options){
 	this.repo = repo;
 	this.options = options || {};
 	this.options.vendor = VENDOR;
+	this.options.defaults = [];
 }
 util.inherits(this.Documentor, EventEmitter);
 
@@ -198,14 +199,12 @@ Documentor.prototype.loadRepoOptions = function(callback){
             this.options[key] = (options[key] || defaultOptions[key] || "").toString("utf-8").trim();
         }).bind(this));
 
-        options.params = {
-            "-E": "abc!",
-            "-e": "cde!",
-            "-r": "34"
-        }
+        
 
-        if(typeof options.params == "object"){
-            this.handleParams(options.params);
+        this.options.params = options.params || this.options.params;
+
+        if(typeof this.options.params == "object"){
+            this.handleParams(this.options.params);
         }
         
         if(this.options.source.substr(0, this.options.checkoutDirectory.length) != this.options.checkoutDirectory){
@@ -218,9 +217,10 @@ Documentor.prototype.loadRepoOptions = function(callback){
 
 Documentor.prototype.handleParams = function(params){
     var engine = config.engines[this.options.engine],
-        curdefault,
+        curvalue,
         defaults = [],
-        usedKeys = {};
+        usedKeys = {},
+        aliasKey;
         
     if(!engine || !engine["allowed-params"]){
         return;
@@ -228,46 +228,95 @@ Documentor.prototype.handleParams = function(params){
     
     Object.keys(params).forEach((function(key){
         if(engine["allowed-params"].indexOf(key)<0)return; // not allowed
-        usedKeys[key] = true;
-        this.addParamValue(defaults, engine, key, params[key]);
+        
+        aliasKey = engine["param-alias"] && engine["param-alias"][key] || key;
+        
+        usedKeys[aliasKey] = true;
+        
+        [].concat(params[key]).forEach((function(value){
+            if((curvalue = this.addParamValue(engine, key, value))){
+                defaults = defaults.concat(curvalue);
+            }
+        }).bind(this))
+        
     }).bind(this));
     
     if(engine.cmd["default-params"]){
         Object.keys(engine.cmd["default-params"]).forEach((function(key){
-            if(!usedKeys[key]){
-                this.addParamValue(defaults, engine, key, engine.cmd["default-params"][key]);
+            aliasKey = engine["param-alias"] && engine["param-alias"][key] || key;
+            
+            if(!usedKeys[aliasKey]){
+                [].concat(engine.cmd["default-params"][key]).forEach((function(value){
+                    if((curvalue = this.addParamValue(engine, key, value))){
+                        defaults = defaults.concat(curvalue);
+                    }
+                }).bind(this))
             }
         }).bind(this));
     }
     
-    console.log(defaults);
+    defaults.forEach((function(curdefault){
+        this.options.defaults.push(curdefault);
+    }).bind(this));
+
 }
 
-Documentor.prototype.addParamValue = function(defaults, engine, key, value){
+Documentor.prototype.addParamValue = function(engine, key, value){
+
+    if(engine["params-filter"] && engine["params-filter"][key]){
+        value = this.applyParamFilter(value, engine["params-filter"][key]);
+    }
+
     if(engine["params-format"]){
         if(key.match(/^\-[^\-]/)){
             if(engine["params-format"]["short"]){
-                if((curdefault = this.replaceParam(engine["params-format"]["short"], key, value))){
-                    defaults = defaults.concat(curdefault);
-                }
+                return this.replaceParam(engine["params-format"]["short"], key, value);
             }
         }else if(key.match(/^\-\-/)){
             if(engine["params-format"]["full"]){
-                if((curdefault = this.replaceParam(engine["params-format"]["full"], key, value))){
-                    defaults = defaults.concat(curdefault);
-                }
+                return this.replaceParam(engine["params-format"]["full"], key, value);
             }
         }
     }
+    
+    return false;
+}
+
+Documentor.prototype.applyParamFilter = function(value, filter){
+    switch(filter){
+        case "chroot":
+            value = (value || "").toString().trim();
+            value = pathlib.join(this.options.source, value);
+            if(value.substr(0, this.options.checkoutDirectory.length) != this.options.checkoutDirectory){
+                value = this.options.source;
+            }
+            break;
+    }
+    
+    return value;
 }
 
 Documentor.prototype.replaceParam = function(format, key, value){
     var response;
+
+    if(value === false){
+        return "";
+    }
+    
+    if(value === true){
+        value = "";
+    }
     
     value = (value || "").toString().trim();
 
-    if(value === true || value.charAt(0) == "-"){
-       value = "";
+    // do not allow 
+    if(value.match(/^\-\-?[^\-\s]/)){
+        // setup exceptions
+        if(this.options.engine == "jsduck" && key == "--warning"){
+            // do nothing
+        }else{
+            value = "";
+        }
     }
     
     if(Array.isArray(format)){
