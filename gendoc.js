@@ -312,7 +312,7 @@ Documentor.prototype.replaceParam = function(format, key, value){
     // do not allow 
     if(value.match(/^\-\-?[^\-\s]/)){
         // setup exceptions
-        if(this.options.engine == "jsduck" && key == "--warning"){
+        if(this.options.engine == "jsduck" && key == "--warnings"){
             // do nothing
         }else{
             value = "";
